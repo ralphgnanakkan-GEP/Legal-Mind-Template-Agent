@@ -41,7 +41,7 @@ else:
         HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2"),
         allow_dangerous_deserialization=True
     )
-    retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+retriever = vectordb.as_retriever(search_kwargs={"k": 3})
 
 @st.cache_resource
 def build_retriever():
