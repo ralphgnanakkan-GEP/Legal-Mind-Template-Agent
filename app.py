@@ -81,7 +81,7 @@ qa_chain1 = RetrievalQA.from_chain_type(
 
 @traceable(name="generate_contract_template_interaction")
 def generate_contract_template(query):
-    return qa_chain.run(query)
+    return qa_chain.invoke(query)
 
 @traceable(name="translate_doc_interaction")
 def translate_doc(doc_text: str, target_lang: str) -> str:
@@ -89,7 +89,7 @@ def translate_doc(doc_text: str, target_lang: str) -> str:
         f"Translate the following contract into {target_lang.upper()} using similar legal structure and terminology "
         f"as seen in the reference documents:\n\n{doc_text}"
     )
-    return qa_chain1.run(prompt)
+    return qa_chain1.invoke(prompt)
 
 # Page configuration
 st.set_page_config(
@@ -623,7 +623,7 @@ def contract_generation_page():
                     progress_bar.progress((i * 33 + j + 1) * 100 // 100)
             
             prompt = "Analyze the client's contract style. Extract common clause types, writing tone, preferred keywords, and jurisdiction references. Return them in bullet points."
-            response = qa_chain2.run(prompt)
+            response = qa_chain2.invoke(prompt)
             query = f"Create a detailed contract template for {contract_type}.Make sure that the generated template is based on {response}. Make sure it is formal, general-purpose, and does not include any party names.Value of the contract is {contract_value}. Jurisdiction is {jurisdiction}. Governing law is {governing_law}. Effective date is {effective_date}."
             st.session_state.history.append(("user_gen", query))
             result = generate_contract_template(query)
@@ -816,7 +816,7 @@ def translation_page():
                     client_feedback = st.text_input("Please provide the changes you require:", key=f"feedback_text_{i}")
                     if st.button("Submit changes", key=f"submit_changes_{i}") and client_feedback:
                         modified_query = f"Make the changes to: {msg} based on the feedback: {client_feedback}"
-                        modified_result = qa_chain1.run(modified_query)
+                        modified_result = qa_chain1.invoke(modified_query)
                         st.session_state.history.append(("ai_trans", modified_result))
                         st.subheader("📑 Modified Language Template Translation")
                         st.text_area("Modified Translation", modified_result, height=400)
