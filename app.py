@@ -25,10 +25,10 @@ import language_tool_python
 import textstat
 from utils import load_contracts_from_folder, build_vector_store, load_docs_from_folder
 
-load_dotenv()
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+LANGCHAIN_API_KEY = st.secrets["LANGCHAIN_API_KEY"]
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
 EMBED_PATH = "embeddings"
 INDEX_FILE = os.path.join(EMBED_PATH, "index.faiss")
 if not os.path.exists(INDEX_FILE):
@@ -41,7 +41,7 @@ else:
         HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2"),
         allow_dangerous_deserialization=True
     )
-    retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+retriever = vectordb.as_retriever(search_kwargs={"k": 3})
 
 @st.cache_resource
 def build_retriever():
@@ -59,12 +59,13 @@ def build_retriever():
 retriever1 = build_retriever()
 
 llm = AzureChatOpenAI(
-    openai_api_key=OPENAI_API_KEY,
-    azure_endpoint="https://openaiqc.gep.com/techathon/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-01-01-preview",
-    openai_api_version="2025-01-01-preview",
-    deployment_name="gpt-4o-mini",
+    openai_api_key=st.secrets["AZURE_OPENAI_API_KEY"],
+    azure_endpoint=st.secrets["AZURE_OPENAI_ENDPOINT"],
+    openai_api_version=st.secrets["AZURE_API_VERSION"],
+    deployment_name=st.secrets["AZURE_DEPLOYMENT_NAME"],
     temperature=0.3
 )
+
 
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
